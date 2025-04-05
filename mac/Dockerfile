@@ -53,29 +53,7 @@ WORKDIR /aws-emr-advisor
 RUN sbt clean compile assembly
 
 # Create a script to run the application
-RUN echo '#!/bin/bash' > /run_commands.sh && \
-    echo 'if [ -z "$BUCKET_NAME" ] || [ -z "$LOG_PATH" ]; then' >> /run_commands.sh && \
-    echo '  echo "Please provide both BUCKET_NAME and LOG_PATH"' >> /run_commands.sh && \
-    echo '  exit 1' >> /run_commands.sh && \
-    echo 'fi' >> /run_commands.sh && \
-    echo 'mkdir -p /tmp/logs' >> /run_commands.sh && \
-    echo 'aws s3 sync s3://${BUCKET_NAME}/${LOG_PATH} /tmp/logs/' >> /run_commands.sh && \
-    echo 'if [ "$(ls -A /tmp/logs)" ]; then' >> /run_commands.sh && \
-    echo '  echo "Logs downloaded successfully."' >> /run_commands.sh && \
-    echo 'else' >> /run_commands.sh && \
-    echo '  echo "No logs found in s3://${BUCKET_NAME}/${LOG_PATH}"' >> /run_commands.sh && \
-    echo '  exit 1' >> /run_commands.sh && \
-    echo 'fi' >> /run_commands.sh && \
-    echo 'for log_file in /tmp/logs/*; do' >> /run_commands.sh && \
-    echo '  echo "Processing $log_file"' >> /run_commands.sh && \
-    echo '  spark-submit --deploy-mode client --class com.amazonaws.emr.SparkLogsAnalyzer /aws-emr-advisor/target/scala-2.12/aws-emr-advisor-assembly-0.3.0.jar $log_file' >> /run_commands.sh && \
-    echo 'done' >> /run_commands.sh && \
-    echo 'for report in /tmp/*.html; do' >> /run_commands.sh && \
-    echo '  if [ -f "$report" ]; then' >> /run_commands.sh && \
-    echo '    aws s3 cp "$report" s3://${BUCKET_NAME}/emr_advisor_output/' >> /run_commands.sh && \
-    echo '    echo "Report uploaded to s3://${BUCKET_NAME}/emr_advisor_output/$(basename $report)"' >> /run_commands.sh && \
-    echo '  fi' >> /run_commands.sh && \
-    echo 'done' >> /run_commands.sh
+COPY ./run_commands.sh /
 
 # Make the script executable
 RUN chmod +x /run_commands.sh
