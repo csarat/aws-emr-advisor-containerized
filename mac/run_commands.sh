@@ -7,7 +7,7 @@ fi
 echo "Load path ${S3_LOG_PATH}"
 rm -rf /tmp/emr_logs
 mkdir -p /tmp/emr_logs
-aws s3 cp ${S3_LOG_PATH} /tmp/emr_logs/ --recursive --profile prd_developer
+aws s3 cp ${S3_LOG_PATH} /tmp/emr_logs/ --recursive
 if [ "$(ls -A /tmp/emr_logs)" ]; then
   echo "Logs downloaded successfully."
 else
